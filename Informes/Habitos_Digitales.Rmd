@@ -40,7 +40,7 @@ library(ggplot2)     # Creación de gráficos
 
 ```{r carga-datos, message=FALSE, warning=FALSE}
 # Cargar el archivo CSV 
-datos <- read_csv("C:/Users/skald/Downloads/PROYECTOS/PORTAFOLIO_PERSONAL/R-studio/digital_habits_vs_mental_health.csv")
+datos <- read_csv("C:/Users/skald/Downloads/PROYECTOS/PORTAFOLIO_PERSONAL/R-studio/Habitos_Digitales/Datos/digital_habits_vs_mental_health.csv")
 
 # Renombrar columnas 
 names(datos) <- c("tiempo_pantalla", "numero_redes", 
