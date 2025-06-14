@@ -14,7 +14,7 @@ Análisis de cómo los hábitos digitales afectan la salud mental en jóvenes de
 
 ## 🌐 Visualización en línea
 
-👉 [Ver informe completo](https://aldair2612.github.io/a/)
+👉 [Ver informe completo]
 
 ## 🔖 Temas del proyecto
 
