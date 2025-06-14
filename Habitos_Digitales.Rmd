@@ -1,0 +1,186 @@
+---
+title: "Análisis de los Hábitos Digitales y la Salud Mental"
+author: "Aldair Yauri Altamirano"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Definición del Proyecto
+
+Este conjunto de datos sintéticos está diseñado para simular el comportamiento digital de jóvenes pertenecientes a la Generación Z y explorar sus posibles efectos sobre la salud mental. Se basa en la generación artificial de patrones estadísticos que imitan comportamientos reales sin comprometer la privacidad.
+
+# Objetivo General
+
+Analizar la relación entre los hábitos digitales y la salud mental en jóvenes de la Generación Z, mediante la identificación de patrones, correlaciones y predictores significativos que permitan generar conciencia y orientar futuras intervenciones en el ámbito de la salud pública.
+
+# Diccionario de Variables
+
+-   `screen_time_hours`: Tiempo total diario frente a pantallas digitales (en horas).\
+-   `social_media_platforms_used`: Número de plataformas de redes sociales utilizadas al día.\
+-   `hours_on_TikTok`: Tiempo promedio diario dedicado exclusivamente a TikTok (en horas).\
+-   `sleep_hours`: Número promedio de horas de sueño por día.\
+-   `stress_level`: Nivel de estrés percibido (escala de 1 a 10).\
+-   `mood_score`: Nivel de estado de ánimo (escala de 1 a 10, donde un valor mayor indica mejor estado de ánimo).
+
+# Fuente de los Datos
+
+Plataforma: Kaggle\
+URL: <https://www.kaggle.com/datasets/abhishekdave9/digital-habits-vs-mental-health-dataset/data>
+
+# 1. Carga de Paquetes
+```{r setup, message=FALSE, warning=FALSE}
+# Si algún paquete no está instalado, usar: install.packages("nombre_del_paquete")
+
+library(tidyverse)   # Manipulación y visualización de datos
+library(readr)       # Lectura eficiente de archivos CSV
+library(ggplot2)     # Creación de gráficos
+```
+
+# 2. Carda de Datos y Exploración
+
+```{r carga-datos, message=FALSE, warning=FALSE}
+# Cargar el archivo CSV 
+datos <- read_csv("C:/Users/skald/Downloads/PROYECTOS/PORTAFOLIO_PERSONAL/R-studio/Habitos_Digitales/Datos/digital_habits_vs_mental_health.csv")
+
+# Renombrar columnas 
+names(datos) <- c("tiempo_pantalla", "numero_redes", 
+                  "horas_tiktok", "promedio_sueño",
+                  "nivel_estres", "estado_animo")
+
+# Exploración inicial
+glimpse(datos)       # Estructura del data frame
+summary(datos)       # Resumen estadístico de las variables
+```
+
+# 3. Limpieza de Datos
+```{r limpieza, message=FALSE, warning=FALSE}
+# Verificar si hay valores nulos por variable
+colSums(is.na(datos))
+
+# Visualizar outliers con boxplots por variable
+ggplot(stack(datos), aes(x = ind, y = values)) + 
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot de las variables del estudio",
+       x = "Variables", y = "Valores") +
+  theme_minimal()
+```
+
+### Comentarios sobre la limpieza de datos
+
+En el proceso de limpieza de datos, se verificó la presencia de valores faltantes en las variables del conjunto, no encontrándose datos nulos en ninguna de ellas. Respecto a los valores atípicos, se identificaron algunos mediante la inspección visual con diagramas de caja (`boxplot`); sin embargo, no fueron eliminados, ya que se consideraron moderados y coherentes con el contexto del estudio. Por esta razón, se decidió conservarlos a fin de mantener la integridad de los datos simulados.
+
+
+# 4. Análisis Exploratorio de Datos (EDA)
+```{r exploracion, message=FALSE, warning=FALSE}
+# a) Matriz de correlaciones
+correlacion <- cor(datos)
+print(round(correlacion, 2))
+
+# b) Gráfico de dispersión con regresión lineal por variable
+# Reorganizar datos en formato largo
+dispersion <- datos %>%
+  select(estado_animo, tiempo_pantalla, horas_tiktok, promedio_sueño, nivel_estres) %>%
+  pivot_longer(cols = -estado_animo, names_to = "variable", values_to = "valor")
+
+ggplot(dispersion, aes(x = valor, y = estado_animo)) +
+  geom_smooth(method = "lm", se = FALSE, color = "red", size = 1.3) +
+  facet_wrap(~variable, scales = "free_x") +
+  labs(title = "Relación lineal entre estado de ánimo y variables predictoras",
+       x = "Variable explicativa",
+       y = "Estado de ánimo") +
+  theme_minimal()
+
+# c) Histogramas por variable
+# Convertir todas las variables a formato largo 
+histograma <- datos %>% 
+  pivot_longer(cols = everything())
+
+ggplot(histograma, aes(x = value)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "white") +
+  facet_wrap(~name, scales = "free") +
+  theme_minimal() +
+  labs(title = "Distribución de las variables del estudio",
+       x = "Valor observado",
+       y = "Frecuencia")
+```
+
+# 5. Modelo de Regresión Múltiple
+```{r modelo-multiple, message=FALSE, warning=FALSE}
+modelo_lineal <- lm(estado_animo ~ tiempo_pantalla + numero_redes + 
+                      horas_tiktok + promedio_sueño + nivel_estres, 
+                    data = datos)
+
+summary(modelo_lineal)
+```
+### Interpretación del modelo
+
+**Intercepto (constante): 6.07 \***  
+Representa el valor esperado del estado de ánimo cuando todas las variables explicativas valen cero.
+
+**tiempo_pantalla: -0.141 \***  
+Cada hora adicional frente a pantallas digitales se asocia con una disminución promedio de 0.141 puntos en el estado de ánimo.
+
+**numero_redes: 0.0017 (no significativo)**  
+El número de redes sociales utilizadas no presenta un efecto estadísticamente significativo sobre el estado de ánimo.
+
+**horas_tiktok: -0.236 \*** 
+Cada hora adicional dedicada a TikTok se relaciona con una reducción promedio de 0.236 puntos en el estado de ánimo.
+
+**promedio_sueño: 0.604 \***  
+Cada hora adicional de sueño mejora el estado de ánimo en 0.604 puntos, en promedio.
+
+**nivel_estres: 0.029 \***  
+Un mayor nivel de estrés percibido se asocia con un leve aumento en el estado de ánimo.  
+*Nota: Aunque en los resultados apareció como coeficiente positivo, el efecto debería ser negativo, ya que, lógicamente, un mayor nivel de estrés se asocia con un menor estado de ánimo.*
+
+---
+
+### Estadísticas globales del modelo
+
+**R² (R-squared):**  
+Aproximadamente el 57% de la variación en el estado de ánimo es explicada por las variables incluidas en el modelo.
+
+**F-statistic:**  
+El modelo es estadísticamente significativo en su conjunto, lo que indica que al menos una de las variables explicativas tiene efecto sobre la variable dependiente.
+
+# 6. Modelo de Regresión Cuadratico
+
+```{r grafico-estres-animo, echo=TRUE, message=FALSE, warning=FALSE}
+# Visualizar el gráfico del estrés y estado de ánimo
+ggplot(datos, aes(x = nivel_estres, y = estado_animo)) +
+  geom_smooth(method = "loess", se = FALSE, color = "blue", size = 1.2) +
+  labs(title = "Relación entre nivel de estrés y estado de ánimo",
+       x = "Nivel de estrés", y = "Estado de ánimo") +
+  theme_minimal()
+
+# Modelo de regresión cuadrática
+modelo_cuad <- lm(estado_animo ~ tiempo_pantalla + numero_redes +
+                    horas_tiktok + promedio_sueño + nivel_estres + 
+                    I(nivel_estres^2), data = datos)
+
+summary(modelo_cuad)
+
+```
+
+### Interpretación del modelo cuadrático
+
+El coeficiente para `nivel_estres` fue de **0.67*** y para `nivel_estres²` fue de **-0.05***. Esto indica que:
+
+- A niveles bajos de estrés, el estado de ánimo tiende a aumentar ligeramente.
+- A niveles altos de estrés, el estado de ánimo disminuye, reflejando una relación de tipo cuadrática.
+
+**Nota:** La inclusión del término cuadrático mejora los estadísticos del modelo, particularmente el valor de R-squared, lo que sugiere un mejor ajuste en comparación con el modelo lineal.
+
+# 7. Conclusiones
+
+a) El tiempo frente a pantallas y el uso excesivo de TikTok tienen un efecto negativo en el estado de ánimo de los jóvenes. Por ello, se recomienda reducir su uso para preservar la salud emocional.
+
+b) Mantener un nivel adecuado de horas de sueño contribuye significativamente a mejorar el estado de ánimo y, en consecuencia, la productividad de los jóvenes.
+
+c) Un nivel moderado de estrés puede estar asociado a una ligera mejora del estado de ánimo. Sin embargo, niveles elevados de estrés afectan negativamente la salud mental, lo que destaca la importancia de estrategias de manejo del estrés.
+
+d) El modelo de regresión múltiple con término cuadrático presenta un poder explicativo del 62%, lo que indica un buen ajuste. Además, los coeficientes obtenidos muestran signos coherentes con lo esperado teóricamente.
+
+e) En general, el uso excesivo de tecnología y redes sociales impacta negativamente en la salud mental de los jóvenes, evidenciando la necesidad de promover un consumo digital más equilibrado y consciente.
+
+---
