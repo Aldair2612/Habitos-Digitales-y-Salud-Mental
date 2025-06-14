@@ -20,6 +20,6 @@ Análisis de cómo los hábitos digitales afectan la salud mental en jóvenes de
 
 R · ggplot2 · visualización · salud mental · hábitos digitales · generación Z
 
-# 📌 Objetivo
+## 📌 Objetivo
 
 Identificar patrones y correlaciones entre el uso de dispositivos digitales y el bienestar psicológico, con el fin de orientar futuras intervenciones en salud pública para jóvenes.
